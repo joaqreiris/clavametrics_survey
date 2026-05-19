@@ -1,0 +1,1293 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ClavaMetrics — Survey / Cuestionario</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:ital,wght@0,300;0,400;0,600;0,700;1,300&family=Barlow+Condensed:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --black: #070b14;
+  --dark: #0d1526;
+  --card: #111d35;
+  --border: #1e2d4a;
+  --accent: #2563eb;
+  --accent2: #10b981;
+  --accent3: #ef4444;
+  --text: #dce8f5;
+  --muted: #6b82a0;
+  --white: #eef4fc;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--black);
+  background-image:
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(37,99,235,0.18) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 30% at 90% 60%, rgba(16,185,129,0.07) 0%, transparent 50%);
+  color: var(--text);
+  font-family: 'Barlow', sans-serif;
+  font-size: 15px;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* NOISE */
+body::before {
+  content:'';
+  position:fixed; inset:0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events:none; z-index:0; opacity:0.5;
+}
+
+/* LANG TOGGLE */
+.lang-bar {
+  position: fixed; top:0; left:0; right:0; z-index:200;
+  background: rgba(7,11,20,0.95);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items:center; justify-content:space-between;
+  padding: 0 40px; height:52px;
+}
+
+.lang-brand {
+  font-family:'Bebas Neue',sans-serif;
+  font-size:20px; letter-spacing:3px; color:var(--accent);
+}
+
+.lang-switch {
+  display:flex; gap:0;
+  border: 1px solid var(--border); border-radius:2px;
+  overflow:hidden;
+}
+
+.lang-btn {
+  padding: 6px 18px;
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:12px; font-weight:700; letter-spacing:2px;
+  text-transform:uppercase; cursor:pointer;
+  background:transparent; color:var(--muted);
+  border:none; transition: background 0.2s, color 0.2s;
+}
+
+.lang-btn.active {
+  background:var(--accent); color:var(--black);
+}
+
+/* HERO */
+.hero {
+  position:relative;
+  padding: 120px 40px 80px;
+  max-width: 900px; margin:0 auto;
+  z-index:1;
+}
+
+.hero-eyebrow {
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:11px; font-weight:700; letter-spacing:3px;
+  text-transform:uppercase; color:var(--accent);
+  margin-bottom:16px; display:flex; align-items:center; gap:10px;
+}
+.hero-eyebrow::before {
+  content:''; display:block; width:28px; height:1px; background:var(--accent);
+}
+
+.hero h1 {
+  font-family:'Bebas Neue',sans-serif;
+  font-size: clamp(48px,7vw,88px);
+  letter-spacing:3px; line-height:0.95;
+  color:var(--white); margin-bottom:24px;
+}
+
+.hero h1 em {
+  color:var(--accent); font-style:normal; display:block;
+}
+
+.hero-desc {
+  font-size:16px; font-weight:300; color:var(--muted);
+  max-width:580px; line-height:1.7;
+  border-left:2px solid var(--accent); padding-left:20px;
+  margin-bottom:40px;
+}
+
+.hero-meta {
+  display:flex; gap:32px; flex-wrap:wrap;
+  padding-top:24px; border-top:1px solid var(--border);
+}
+
+.meta-item { display:flex; flex-direction:column; gap:3px; }
+.meta-num {
+  font-family:'Bebas Neue',sans-serif;
+  font-size:28px; letter-spacing:2px; color:var(--accent); line-height:1;
+}
+.meta-label {
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:10px; font-weight:700; letter-spacing:2px;
+  text-transform:uppercase; color:var(--muted);
+}
+
+/* PROGRESS BAR */
+.survey-progress {
+  position:sticky; top:52px; z-index:100;
+  background: rgba(7,11,20,0.9);
+  backdrop-filter:blur(8px);
+  border-bottom:1px solid var(--border);
+  padding: 12px 40px;
+  display:flex; align-items:center; gap:20px;
+}
+
+.progress-track {
+  flex:1; height:3px; background:var(--border); border-radius:2px; overflow:hidden;
+}
+.progress-fill {
+  height:100%; background: linear-gradient(90deg, #2563eb, #10b981);
+  border-radius:2px; transition: width 0.4s ease;
+  width:0%;
+}
+.progress-text {
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:12px; font-weight:700; letter-spacing:1.5px;
+  text-transform:uppercase; color:var(--muted);
+  white-space:nowrap; min-width:80px;
+}
+
+/* FORM WRAPPER */
+.form-wrapper {
+  max-width:900px; margin:0 auto;
+  padding: 0 40px 100px;
+  position:relative; z-index:1;
+}
+
+/* SECTION BLOCK */
+.q-section {
+  margin-bottom:16px;
+  border: 1px solid var(--border);
+  background:var(--card);
+  border-radius:2px;
+  overflow:hidden;
+  transition: border-color 0.3s;
+}
+
+.q-section.active { border-color: rgba(37,99,235,0.4); }
+.q-section.completed { border-color: rgba(37,99,235,0.15); }
+
+.q-section-header {
+  padding:24px 28px 20px;
+  border-bottom:1px solid var(--border);
+  display:flex; align-items:flex-start; gap:16px;
+}
+
+.q-num {
+  font-family:'Bebas Neue',sans-serif;
+  font-size:32px; letter-spacing:2px; color:var(--accent);
+  line-height:1; flex-shrink:0; width:36px;
+}
+
+.q-content { flex:1; }
+
+.q-label {
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:10px; font-weight:700; letter-spacing:2.5px;
+  text-transform:uppercase; color:var(--muted); margin-bottom:6px;
+}
+
+.q-title {
+  font-size:17px; font-weight:600; color:var(--white);
+  line-height:1.4; margin-bottom:4px;
+}
+
+.q-title-alt {
+  font-size:13px; font-weight:300; color:var(--muted);
+  font-style:italic; line-height:1.4;
+}
+
+.q-optional {
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:10px; font-weight:600; letter-spacing:1.5px;
+  text-transform:uppercase; color:var(--muted);
+  display:inline-block; margin-top:6px;
+  border:1px solid var(--border); padding:2px 7px;
+}
+
+.q-body { padding:20px 28px 24px; }
+
+/* RADIO / CHECKBOX OPTIONS */
+.options { display:flex; flex-direction:column; gap:8px; }
+.options.grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.options.grid3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; }
+
+.option-label {
+  display:flex; align-items:center; gap:12px;
+  padding:10px 16px;
+  border:1px solid var(--border);
+  cursor:pointer; border-radius:2px;
+  transition: border-color 0.15s, background 0.15s;
+  position:relative;
+}
+
+.option-label:hover {
+  border-color: rgba(37,99,235,0.4);
+  background: rgba(37,99,235,0.03);
+}
+
+.option-label input { display:none; }
+
+.option-label.selected {
+  border-color: var(--accent);
+  background: rgba(37,99,235,0.06);
+}
+
+.option-check {
+  width:18px; height:18px;
+  border:1px solid var(--muted);
+  border-radius:50%; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.option-label.selected .option-check {
+  border-color:var(--accent); background:var(--accent);
+}
+
+.option-check::after {
+  content:'';
+  width:7px; height:7px;
+  border-radius:50%; background:var(--black);
+  display:none;
+}
+.option-label.selected .option-check::after { display:block; }
+
+.option-check.square { border-radius:2px; }
+.option-check.square::after {
+  content:'✓';
+  width:auto; height:auto;
+  font-size:11px; font-weight:700;
+  background:transparent; color:var(--black);
+  display:none;
+}
+.option-label.selected .option-check.square::after { display:block; }
+
+.option-text {
+  font-size:14px; color:var(--text); font-weight:300; line-height:1.4;
+}
+.option-text strong { color:var(--white); font-weight:600; display:block; font-size:14px; }
+.option-text small { font-size:12px; color:var(--muted); }
+
+/* SCALE */
+.scale-wrap { display:flex; flex-direction:column; gap:8px; }
+.scale-options { display:flex; gap:6px; }
+.scale-btn {
+  flex:1; height:44px;
+  border:1px solid var(--border);
+  background:transparent; color:var(--muted);
+  font-family:'Bebas Neue',sans-serif;
+  font-size:18px; letter-spacing:1px;
+  cursor:pointer; border-radius:2px;
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
+}
+.scale-btn:hover { border-color: rgba(37,99,235,0.4); color:var(--text); }
+.scale-btn.selected { border-color:var(--accent); background: var(--accent); color: #fff; }
+.scale-labels {
+  display:flex; justify-content:space-between;
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:10px; font-weight:600; letter-spacing:1px;
+  text-transform:uppercase; color:var(--muted);
+  padding:0 2px;
+}
+
+/* TEXT INPUT */
+.text-input, .textarea-input {
+  width:100%; background:var(--dark);
+  border:1px solid var(--border);
+  color:var(--text); font-family:'Barlow',sans-serif;
+  font-size:14px; font-weight:300;
+  padding:12px 16px; border-radius:2px;
+  outline:none; resize:vertical;
+  transition: border-color 0.2s;
+}
+.text-input:focus, .textarea-input:focus {
+  border-color: rgba(37,99,235,0.5);
+}
+.text-input::placeholder, .textarea-input::placeholder {
+  color:var(--muted);
+}
+.textarea-input { min-height:100px; }
+
+.input-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.input-group { display:flex; flex-direction:column; gap:6px; }
+.input-label {
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:11px; font-weight:700; letter-spacing:1.5px;
+  text-transform:uppercase; color:var(--muted);
+}
+
+/* SECTION TITLE DIVIDER */
+.section-divider {
+  display:flex; align-items:center; gap:16px;
+  margin: 40px 0 20px;
+}
+.section-divider-line { flex:1; height:1px; background:var(--border); }
+.section-divider-text {
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:11px; font-weight:700; letter-spacing:3px;
+  text-transform:uppercase; color:var(--accent);
+  white-space:nowrap;
+}
+
+/* SUBMIT */
+.submit-area {
+  margin-top:40px;
+  background:var(--card);
+  border:1px solid var(--border);
+  padding:32px 28px;
+  border-radius:2px;
+}
+
+.submit-note {
+  font-size:13px; font-weight:300; color:var(--muted);
+  margin-bottom:20px; line-height:1.6;
+}
+
+.submit-btn {
+  display:inline-flex; align-items:center; gap:12px;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: #ffffff;
+  font-family:'Bebas Neue',sans-serif;
+  font-size:20px; letter-spacing:3px;
+  padding:14px 40px; border:none; cursor:pointer;
+  border-radius:2px; transition: opacity 0.2s, transform 0.2s;
+  box-shadow: 0 4px 20px rgba(37,99,235,0.35);
+}
+.submit-btn:hover { opacity:0.88; transform:translateY(-1px); }
+.submit-btn:active { transform:translateY(0); }
+
+/* THANK YOU */
+.thankyou {
+  display:none;
+  min-height:80vh; align-items:center; justify-content:center;
+  flex-direction:column; text-align:center;
+  padding:80px 40px;
+  position:relative; z-index:1;
+}
+.thankyou.visible { display:flex; }
+
+.thankyou-icon { font-size:64px; margin-bottom:24px; }
+.thankyou h2 {
+  font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(36px,6vw,72px);
+  letter-spacing:4px; color:var(--white); margin-bottom:16px;
+}
+.thankyou h2 span { color:var(--accent); display:block; }
+.thankyou p { font-size:16px; font-weight:300; color:var(--muted); max-width:480px; line-height:1.7; }
+.thankyou-results {
+  display:grid; grid-template-columns:repeat(3,1fr); gap:20px;
+  max-width:600px; width:100%; margin-top:48px;
+}
+.result-card {
+  background:var(--card); border:1px solid var(--border);
+  padding:20px; border-radius:2px;
+}
+.result-val {
+  font-family:'Bebas Neue',sans-serif;
+  font-size:36px; letter-spacing:2px; color:var(--accent); line-height:1;
+}
+.result-lbl {
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:10px; font-weight:700; letter-spacing:1.5px;
+  text-transform:uppercase; color:var(--muted); margin-top:4px;
+}
+
+/* HIDDEN LANG CONTENT */
+[data-lang="en"] { display:none; }
+body.lang-en [data-lang="es"] { display:none; }
+body.lang-en [data-lang="en"] { display:block; }
+body.lang-en .inline-en { display:inline; }
+body.lang-en .inline-es { display:none; }
+.inline-en { display:none; }
+.inline-es { display:inline; }
+
+/* REQUIRED ASTERISK */
+.req { color:var(--accent3); margin-left:2px; }
+
+/* OTHER INPUT */
+.other-input-wrap {
+  display: none;
+  margin-top: 8px;
+  animation: fadeSlideIn 0.22s ease;
+}
+.other-input-wrap.visible {
+  display: block;
+}
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.other-text-input {
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 0 3px rgba(37,99,235,0.12);
+}
+
+/* VALIDATION HINT */
+.hint {
+  font-size:12px; color:var(--accent3);
+  margin-top:6px; display:none;
+  font-family:'Barlow Condensed',sans-serif;
+  letter-spacing:0.5px;
+}
+.hint.visible { display:block; }
+
+/* RESPONSIVE */
+@media (max-width:700px) {
+  .lang-bar, .survey-progress { padding:0 20px; }
+  .hero, .form-wrapper { padding-left:20px; padding-right:20px; }
+  .options.grid, .options.grid3 { grid-template-columns:1fr; }
+  .input-row { grid-template-columns:1fr; }
+  .scale-btn { font-size:15px; }
+  .thankyou-results { grid-template-columns:1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- LANG BAR -->
+<div class="lang-bar">
+  <div class="lang-brand">CLAVAMETRICS</div>
+  <div class="lang-switch">
+    <button class="lang-btn active" onclick="setLang('es')">ES</button>
+    <button class="lang-btn" onclick="setLang('en')">EN</button>
+  </div>
+</div>
+
+<!-- PROGRESS -->
+<div class="survey-progress">
+  <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+  <div class="progress-text" id="progressText">
+    <span class="inline-es">0 / 14</span>
+    <span class="inline-en">0 / 14</span>
+  </div>
+</div>
+
+<!-- HERO -->
+<div class="hero" id="mainContent">
+  <div class="hero-eyebrow">
+    <span class="inline-es">Investigación de Mercado · 5 minutos</span>
+    <span class="inline-en">Market Research · 5 minutes</span>
+  </div>
+  <h1>
+    <span data-lang="es">Tu opinión<em>importa.</em></span>
+    <span data-lang="en">Your voice<em>matters.</em></span>
+  </h1>
+  <p class="hero-desc" data-lang="es">
+    Estamos construyendo ClavaMetrics, una plataforma que centraliza GPS, wellness, RPE, fisioterapia y planificación del entrenamiento en una sola herramienta. Antes de desarrollarla, queremos escuchar a los preparadores físicos. Tus respuestas guiarán el producto.
+  </p>
+  <p class="hero-desc" data-lang="en">
+    We're building ClavaMetrics, a platform that centralises GPS, wellness, RPE, physiotherapy and training planning in one single tool. Before we build it, we want to hear from sports science & performance staff. Your answers will shape the product.
+  </p>
+  <div class="hero-meta">
+    <div class="meta-item">
+      <span class="meta-num">14</span>
+      <span class="meta-label" data-lang="es">Preguntas</span>
+      <span class="meta-label" data-lang="en">Questions</span>
+    </div>
+    <div class="meta-item">
+      <span class="meta-num">~5'</span>
+      <span class="meta-label" data-lang="es">Minutos</span>
+      <span class="meta-label" data-lang="en">Minutes</span>
+    </div>
+    <div class="meta-item">
+      <span class="meta-num">100%</span>
+      <span class="meta-label" data-lang="es">Anónimo</span>
+      <span class="meta-label" data-lang="en">Anonymous</span>
+    </div>
+  </div>
+</div>
+
+<!-- FORM -->
+<div class="form-wrapper" id="formWrapper">
+<form id="surveyForm" novalidate>
+
+  <!-- ─────── BLOQUE A: PERFIL ─────── -->
+  <div class="section-divider">
+    <div class="section-divider-line"></div>
+    <div class="section-divider-text">
+      <span class="inline-es">A — Perfil profesional</span>
+      <span class="inline-en">A — Professional Profile</span>
+    </div>
+    <div class="section-divider-line"></div>
+  </div>
+
+  <!-- Q1 -->
+  <div class="q-section" id="q1">
+    <div class="q-section-header">
+      <div class="q-num">01</div>
+      <div class="q-content">
+        <div class="q-label" data-lang="es">Perfil</div>
+        <div class="q-label" data-lang="en">Role</div>
+        <div class="q-title" data-lang="es">¿Cuál es tu rol principal en el club? <span class="req">*</span></div>
+        <div class="q-title" data-lang="en">What is your primary role at the club? <span class="req">*</span></div>
+        <div class="q-title-alt" data-lang="es">Selecciona el que mejor te describa</div>
+        <div class="q-title-alt" data-lang="en">Select the one that best describes you</div>
+      </div>
+    </div>
+    <div class="q-body">
+      <div class="options grid" data-name="rol" data-required="true">
+        <label class="option-label">
+          <input type="radio" name="rol" value="prep_fisico">
+          <div class="option-check"></div>
+          <div class="option-text">
+            <strong data-lang="es">Preparador Físico</strong>
+            <strong data-lang="en">Strength & Conditioning Coach</strong>
+          </div>
+        </label>
+        <label class="option-label">
+          <input type="radio" name="rol" value="fisio">
+          <div class="option-check"></div>
+          <div class="option-text">
+            <strong data-lang="es">Fisioterapeuta / Médico</strong>
+            <strong data-lang="en">Physiotherapist / Club Doctor</strong>
+          </div>
+        </label>
+        <label class="option-label">
+          <input type="radio" name="rol" value="entrenador">
+          <div class="option-check"></div>
+          <div class="option-text">
+            <strong data-lang="es">Entrenador</strong>
+            <strong data-lang="en">Head / Assistant Coach</strong>
+          </div>
+        </label>
+        <label class="option-label">
+          <input type="radio" name="rol" value="director_rend">
+          <div class="option-check"></div>
+          <div class="option-text">
+            <strong data-lang="es">Director de Rendimiento</strong>
+            <strong data-lang="en">Performance / Sports Science Director</strong>
+          </div>
+        </label>
+        <label class="option-label">
+          <input type="radio" name="rol" value="analitica">
+          <div class="option-check"></div>
+          <div class="option-text">
+            <strong data-lang="es">Analista de Datos / Vídeo</strong>
+            <strong data-lang="en">Data / Video Analyst</strong>
+          </div>
+        </label>
+        <label class="option-label" data-triggers="otro-rol">
+          <input type="radio" name="rol" value="otro">
+          <div class="option-check"></div>
+          <div class="option-text">
+            <strong data-lang="es">Otro</strong>
+            <strong data-lang="en">Other</strong>
+          </div>
+        </label>
+      </div>
+      <div class="other-input-wrap" id="otro-rol">
+        <input type="text" class="text-input other-text-input" name="rol_otro" placeholder="Especifica tu rol… / Specify your role…" autocomplete="off">
+      </div>
+      <div class="hint" id="hint-q1" data-lang="es">Selecciona una opción para continuar.</div>
+      <div class="hint" id="hint-q1-en" data-lang="en">Please select an option to continue.</div>
+    </div>
+  </div>
+
+  <!-- Q2 -->
+  <div class="q-section" id="q2">
+    <div class="q-section-header">
+      <div class="q-num">02</div>
+      <div class="q-content">
+        <div class="q-label" data-lang="es">Nivel del Club</div>
+        <div class="q-label" data-lang="en">Club Level</div>
+        <div class="q-title" data-lang="es">¿En qué nivel competitivo trabaja tu club actualmente? <span class="req">*</span></div>
+        <div class="q-title" data-lang="en">What competitive level does your club currently operate at? <span class="req">*</span></div>
+      </div>
+    </div>
+    <div class="q-body">
+      <div class="options" data-name="nivel" data-required="true">
+        <label class="option-label">
+          <input type="radio" name="nivel" value="elite_top5">
+          <div class="option-check"></div>
+          <div class="option-text">
+            <strong data-lang="es">Primera División — Top 5 europeo (Premier, La Liga, Bundesliga, Serie A, Ligue 1)</strong>
+            <strong data-lang="en">First Division — Top 5 European league (Premier, La Liga, Bundesliga, Serie A, Ligue 1)</strong>
+          </div>
+        </label>
+        <label class="option-label">
+          <input type="radio" name="nivel" value="pro_1div">
+          <div class="option-check"></div>
+          <div class="option-text">
+            <strong data-lang="es">Primera División — otras ligas profesionales</strong>
+            <strong data-lang="en">First Division — other professional leagues</strong>
+          </div>
+        </label>
+        <label class="option-label">
+          <input type="radio" name="nivel" value="pro_2div">
+          <div class="option-check"></div>
+          <div class="option-text">
+            <strong data-lang="es">Segunda / Tercera División profesional o semiprofesional</strong>
+            <strong data-lang="en">Second / Third Division — professional or semi-professional</strong>
+          </div>
+        </label>
+        <label class="option-label">
+          <input type="radio" name="nivel" value="academia">
+          <div class="option-check"></div>
+          <div class="option-text">
+            <strong data-lang="es">Academia / Cantera (sub-18, sub-23)</strong>
+            <strong data-lang="en">Academy / Youth Development (U18, U23)</strong>
+          </div>
+        </label>
+        <label class="option-label">
+          <input type="radio" name="nivel" value="amateur">
+          <div class="option-check"></div>
+          <div class="option-text">
+            <strong data-lang="es">Amateur / Regional</strong>
+            <strong data-lang="en">Amateur / Regional</strong>
+          </div>
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <!-- Q3 -->
+  <div class="q-section" id="q3">
+    <div class="q-section-header">
+      <div class="q-num">03</div>
+      <div class="q-content">
+        <div class="q-label" data-lang="es">País / Mercado</div>
+        <div class="q-label" data-lang="en">Country / Market</div>
+        <div class="q-title" data-lang="es">¿En qué país trabajas actualmente? <span class="req">*</span></div>
+        <div class="q-title" data-lang="en">Which country do you currently work in? <span class="req">*</span></div>
+      </div>
+    </div>
+    <div class="q-body">
+      <div class="options grid3" data-name="pais" data-required="true">
+        <label class="option-label"><input type="radio" name="pais" value="espana"><div class="option-check"></div><div class="option-text"><strong>🇪🇸 España</strong></div></label>
+        <label class="option-label"><input type="radio" name="pais" value="latam"><div class="option-check"></div><div class="option-text"><strong>🌎 LATAM</strong><small data-lang="es">México, Argentina, Colombia…</small><small data-lang="en">Mexico, Argentina, Colombia…</small></div></label>
+        <label class="option-label"><input type="radio" name="pais" value="uk"><div class="option-check"></div><div class="option-text"><strong>🇬🇧 UK / Ireland</strong></div></label>
+        <label class="option-label"><input type="radio" name="pais" value="italy"><div class="option-check"></div><div class="option-text"><strong>🇮🇹 Italy / Portugal</strong></div></label>
+        <label class="option-label"><input type="radio" name="pais" value="europe_other"><div class="option-check"></div><div class="option-text"><strong>🇪🇺 <span data-lang="es">Otro Europa</span><span data-lang="en">Other Europe</span></strong></div></label>
+        <label class="option-label" data-triggers="otro-pais"><input type="radio" name="pais" value="other"><div class="option-check"></div><div class="option-text"><strong>🌍 <span data-lang="es">Otro</span><span data-lang="en">Other</span></strong></div></label>
+      </div>
+      <div class="other-input-wrap" id="otro-pais">
+        <input type="text" class="text-input other-text-input" name="pais_otro" placeholder="¿Cuál? / Which country?" autocomplete="off">
+      </div>
+    </div>
+  </div>
+
+  <!-- ─────── BLOQUE B: SITUACIÓN ACTUAL ─────── -->
+  <div class="section-divider">
+    <div class="section-divider-line"></div>
+    <div class="section-divider-text">
+      <span class="inline-es">B — Herramientas que usas hoy</span>
+      <span class="inline-en">B — Current Tools & Workflows</span>
+    </div>
+    <div class="section-divider-line"></div>
+  </div>
+
+  <!-- Q4 -->
+  <div class="q-section" id="q4">
+    <div class="q-section-header">
+      <div class="q-num">04</div>
+      <div class="q-content">
+        <div class="q-title" data-lang="es">¿Cuántas herramientas o aplicaciones distintas usa tu staff técnico en el día a día? <span class="req">*</span></div>
+        <div class="q-title" data-lang="en">How many different tools or apps does your technical staff use on a daily basis? <span class="req">*</span></div>
+        <div class="q-title-alt" data-lang="es">Incluye Excel, WhatsApp, apps de GPS, software de fisio, etc.</div>
+        <div class="q-title-alt" data-lang="en">Include Excel, WhatsApp, GPS apps, physio software, etc.</div>
+      </div>
+    </div>
+    <div class="q-body">
+      <div class="options grid" data-name="n_herramientas" data-required="true">
+        <label class="option-label"><input type="radio" name="n_herramientas" value="1-2"><div class="option-check"></div><div class="option-text"><strong>1–2</strong></div></label>
+        <label class="option-label"><input type="radio" name="n_herramientas" value="3-4"><div class="option-check"></div><div class="option-text"><strong>3–4</strong></div></label>
+        <label class="option-label"><input type="radio" name="n_herramientas" value="5-6"><div class="option-check"></div><div class="option-text"><strong>5–6</strong></div></label>
+        <label class="option-label"><input type="radio" name="n_herramientas" value="7+"><div class="option-check"></div><div class="option-text"><strong>7+</strong></div></label>
+      </div>
+    </div>
+  </div>
+
+  <!-- Q5 -->
+  <div class="q-section" id="q5">
+    <div class="q-section-header">
+      <div class="q-num">05</div>
+      <div class="q-content">
+        <div class="q-title" data-lang="es">¿Cuáles de los siguientes aspectos suponen una fricción real en tu trabajo? <span class="req">*</span></div>
+        <div class="q-title" data-lang="en">Which of the following represent a real friction point in your daily work? <span class="req">*</span></div>
+        <div class="q-title-alt" data-lang="es">Selecciona todos los que apliquen</div>
+        <div class="q-title-alt" data-lang="en">Select all that apply</div>
+      </div>
+    </div>
+    <div class="q-body">
+      <div class="options grid" data-name="fricciones" data-type="checkbox" data-required="true">
+        <label class="option-label"><input type="checkbox" name="fricciones" value="datos_dispersos"><div class="option-check square"></div><div class="option-text"><strong data-lang="es">Datos dispersos en varias plataformas</strong><strong data-lang="en">Data scattered across multiple platforms</strong></div></label>
+        <label class="option-label"><input type="checkbox" name="fricciones" value="comunicacion_staff"><div class="option-check square"></div><div class="option-text"><strong data-lang="es">Mala comunicación entre departamentos</strong><strong data-lang="en">Poor communication between departments</strong></div></label>
+        <label class="option-label"><input type="checkbox" name="fricciones" value="registro_lesiones"><div class="option-check square"></div><div class="option-text"><strong data-lang="es">Registro manual o impreciso de lesiones</strong><strong data-lang="en">Manual or inaccurate injury tracking</strong></div></label>
+        <label class="option-label"><input type="checkbox" name="fricciones" value="gps_analisis"><div class="option-check square"></div><div class="option-text"><strong data-lang="es">Análisis de GPS/carga tedioso o manual</strong><strong data-lang="en">Tedious or manual GPS/load analysis</strong></div></label>
+        <label class="option-label"><input type="checkbox" name="fricciones" value="wellness_rpe"><div class="option-check square"></div><div class="option-text"><strong data-lang="es">Sin sistema centralizado de wellness/RPE</strong><strong data-lang="en">No centralised wellness/RPE system</strong></div></label>
+        <label class="option-label"><input type="checkbox" name="fricciones" value="planificacion"><div class="option-check square"></div><div class="option-text"><strong data-lang="es">Planificación de sesiones en Excel o papel</strong><strong data-lang="en">Session planning done in Excel or on paper</strong></div></label>
+        <label class="option-label"><input type="checkbox" name="fricciones" value="precio_herramientas"><div class="option-check square"></div><div class="option-text"><strong data-lang="es">Las herramientas buenas son demasiado caras</strong><strong data-lang="en">Good tools are too expensive for our budget</strong></div></label>
+        <label class="option-label"><input type="checkbox" name="fricciones" value="adopcion_staff"><div class="option-check square"></div><div class="option-text"><strong data-lang="es">El staff no adopta bien las herramientas</strong><strong data-lang="en">Staff don't adopt tools consistently</strong></div></label>
+      </div>
+    </div>
+  </div>
+
+  <!-- Q6 -->
+  <div class="q-section" id="q6">
+    <div class="q-section-header">
+      <div class="q-num">06</div>
+      <div class="q-content">
+        <div class="q-title" data-lang="es">¿Usas actualmente algún software específico de rendimiento deportivo? <span class="req">*</span></div>
+        <div class="q-title" data-lang="en">Do you currently use any dedicated sports performance software? <span class="req">*</span></div>
+      </div>
+    </div>
+    <div class="q-body">
+      <div class="options" data-name="software_actual" data-required="true">
+        <label class="option-label"><input type="radio" name="software_actual" value="catapult"><div class="option-check"></div><div class="option-text"><strong>Catapult</strong></div></label>
+        <label class="option-label"><input type="radio" name="software_actual" value="statsports"><div class="option-check"></div><div class="option-text"><strong>STATSports APEX</strong></div></label>
+        <label class="option-label"><input type="radio" name="software_actual" value="teamworks"><div class="option-check"></div><div class="option-text"><strong>Teamworks / Smartabase</strong></div></label>
+        <label class="option-label"><input type="radio" name="software_actual" value="kitman"><div class="option-check"></div><div class="option-text"><strong>Kitman Labs</strong></div></label>
+        <label class="option-label" data-triggers="otro-sw"><input type="radio" name="software_actual" value="otro_sw"><div class="option-check"></div><div class="option-text"><strong data-lang="es">Otro software</strong><strong data-lang="en">Other software</strong></div></label>
+        <label class="option-label"><input type="radio" name="software_actual" value="ninguno"><div class="option-check"></div><div class="option-text"><strong data-lang="es">No, solo Excel / herramientas genéricas</strong><strong data-lang="en">No, only Excel / generic tools</strong></div></label>
+      </div>
+      <div class="other-input-wrap" id="otro-sw">
+        <input type="text" class="text-input other-text-input" name="software_actual_otro" placeholder="¿Cuál software usas? / Which software?" autocomplete="off">
+      </div>
+    </div>
+  </div>
+
+  <!-- ─────── BLOQUE C: VALOR Y PRIORIDADES ─────── -->
+  <div class="section-divider">
+    <div class="section-divider-line"></div>
+    <div class="section-divider-text">
+      <span class="inline-es">C — Prioridades y valor percibido</span>
+      <span class="inline-en">C — Priorities & Perceived Value</span>
+    </div>
+    <div class="section-divider-line"></div>
+  </div>
+
+  <!-- Q7 -->
+  <div class="q-section" id="q7">
+    <div class="q-section-header">
+      <div class="q-num">07</div>
+      <div class="q-content">
+        <div class="q-title" data-lang="es">¿Qué módulos serían más valiosos para ti en una plataforma integrada? <span class="req">*</span></div>
+        <div class="q-title" data-lang="en">Which modules would be most valuable in an integrated platform? <span class="req">*</span></div>
+        <div class="q-title-alt" data-lang="es">Selecciona hasta 3 opciones</div>
+        <div class="q-title-alt" data-lang="en">Select up to 3 options</div>
+      </div>
+    </div>
+    <div class="q-body">
+      <div class="options grid" data-name="modulos_valor" data-type="checkbox" data-max="3" data-required="true">
+        <label class="option-label"><input type="checkbox" name="modulos_valor" value="gps_carga"><div class="option-check square"></div><div class="option-text"><strong data-lang="es">GPS y monitorización de carga externa</strong><strong data-lang="en">GPS & external load monitoring</strong></div></label>
+        <label class="option-label"><input type="checkbox" name="modulos_valor" value="wellness_rpe_mod"><div class="option-check square"></div><div class="option-text"><strong data-lang="es">Wellness y RPE diario</strong><strong data-lang="en">Daily wellness & RPE</strong></div></label>
+        <label class="option-label"><input type="checkbox" name="modulos_valor" value="lesiones_fisio"><div class="option-check square"></div><div class="option-text"><strong data-lang="es">Seguimiento de lesiones + fisioterapia</strong><strong data-lang="en">Injury tracking & physiotherapy</strong></div></label>
+        <label class="option-label"><input type="checkbox" name="modulos_valor" value="planificacion_sesiones"><div class="option-check square"></div><div class="option-text"><strong data-lang="es">Planificación y diseño de sesiones</strong><strong data-lang="en">Session design & planning</strong></div></label>
+        <label class="option-label"><input type="checkbox" name="modulos_valor" value="gym_fuerza"><div class="option-check square"></div><div class="option-text"><strong data-lang="es">Control del gimnasio / fuerza</strong><strong data-lang="en">Gym / strength training control</strong></div></label>
+        <label class="option-label"><input type="checkbox" name="modulos_valor" value="comunicacion_mod"><div class="option-check square"></div><div class="option-text"><strong data-lang="es">Comunicación interna del staff</strong><strong data-lang="en">Internal staff communication</strong></div></label>
+        <label class="option-label"><input type="checkbox" name="modulos_valor" value="dashboard_entrenador"><div class="option-check square"></div><div class="option-text"><strong data-lang="es">Dashboard de rendimiento para el entrenador</strong><strong data-lang="en">Coaching performance dashboard</strong></div></label>
+        <label class="option-label"><input type="checkbox" name="modulos_valor" value="gestion_club"><div class="option-check square"></div><div class="option-text"><strong data-lang="es">Gestión operativa / finanzas del club</strong><strong data-lang="en">Club operations / finances</strong></div></label>
+      </div>
+      <div class="hint" id="hint-q7" data-lang="es">Máximo 3 opciones.</div>
+      <div class="hint" id="hint-q7-en" data-lang="en">Maximum 3 options.</div>
+    </div>
+  </div>
+
+  <!-- Q8 — SCALE -->
+  <div class="q-section" id="q8">
+    <div class="q-section-header">
+      <div class="q-num">08</div>
+      <div class="q-content">
+        <div class="q-title" data-lang="es">¿Cuánto valor le darías a tener todos estos módulos en una sola plataforma, en lugar de herramientas separadas? <span class="req">*</span></div>
+        <div class="q-title" data-lang="en">How much value would you place on having all these modules in one single platform, rather than separate tools? <span class="req">*</span></div>
+      </div>
+    </div>
+    <div class="q-body">
+      <div class="scale-wrap" data-name="valor_integracion" data-required="true">
+        <div class="scale-options">
+          <button type="button" class="scale-btn" data-val="1" onclick="selectScale(this,'valor_integracion')">1</button>
+          <button type="button" class="scale-btn" data-val="2" onclick="selectScale(this,'valor_integracion')">2</button>
+          <button type="button" class="scale-btn" data-val="3" onclick="selectScale(this,'valor_integracion')">3</button>
+          <button type="button" class="scale-btn" data-val="4" onclick="selectScale(this,'valor_integracion')">4</button>
+          <button type="button" class="scale-btn" data-val="5" onclick="selectScale(this,'valor_integracion')">5</button>
+          <button type="button" class="scale-btn" data-val="6" onclick="selectScale(this,'valor_integracion')">6</button>
+          <button type="button" class="scale-btn" data-val="7" onclick="selectScale(this,'valor_integracion')">7</button>
+          <button type="button" class="scale-btn" data-val="8" onclick="selectScale(this,'valor_integracion')">8</button>
+          <button type="button" class="scale-btn" data-val="9" onclick="selectScale(this,'valor_integracion')">9</button>
+          <button type="button" class="scale-btn" data-val="10" onclick="selectScale(this,'valor_integracion')">10</button>
+        </div>
+        <div class="scale-labels">
+          <span data-lang="es">Sin valor</span><span data-lang="en">No value</span>
+          <span data-lang="es">Imprescindible</span><span data-lang="en">Absolutely essential</span>
+        </div>
+        <input type="hidden" name="valor_integracion" value="">
+      </div>
+    </div>
+  </div>
+
+  <!-- Q9 — SCALE -->
+  <div class="q-section" id="q9">
+    <div class="q-section-header">
+      <div class="q-num">09</div>
+      <div class="q-content">
+        <div class="q-title" data-lang="es">¿Cuánto problema te supone hoy la fragmentación de herramientas? <span class="req">*</span></div>
+        <div class="q-title" data-lang="en">How much of a problem is tool fragmentation for you today? <span class="req">*</span></div>
+        <div class="q-title-alt" data-lang="es">El hecho de tener datos en distintas apps, sin visión unificada del jugador.</div>
+        <div class="q-title-alt" data-lang="en">Having player data spread across different apps, with no unified view.</div>
+      </div>
+    </div>
+    <div class="q-body">
+      <div class="scale-wrap" data-name="problema_fragmentacion" data-required="true">
+        <div class="scale-options">
+          <button type="button" class="scale-btn" data-val="1" onclick="selectScale(this,'problema_fragmentacion')">1</button>
+          <button type="button" class="scale-btn" data-val="2" onclick="selectScale(this,'problema_fragmentacion')">2</button>
+          <button type="button" class="scale-btn" data-val="3" onclick="selectScale(this,'problema_fragmentacion')">3</button>
+          <button type="button" class="scale-btn" data-val="4" onclick="selectScale(this,'problema_fragmentacion')">4</button>
+          <button type="button" class="scale-btn" data-val="5" onclick="selectScale(this,'problema_fragmentacion')">5</button>
+          <button type="button" class="scale-btn" data-val="6" onclick="selectScale(this,'problema_fragmentacion')">6</button>
+          <button type="button" class="scale-btn" data-val="7" onclick="selectScale(this,'problema_fragmentacion')">7</button>
+          <button type="button" class="scale-btn" data-val="8" onclick="selectScale(this,'problema_fragmentacion')">8</button>
+          <button type="button" class="scale-btn" data-val="9" onclick="selectScale(this,'problema_fragmentacion')">9</button>
+          <button type="button" class="scale-btn" data-val="10" onclick="selectScale(this,'problema_fragmentacion')">10</button>
+        </div>
+        <div class="scale-labels">
+          <span data-lang="es">No es problema</span><span data-lang="en">Not a problem</span>
+          <span data-lang="es">Problema crítico</span><span data-lang="en">Critical problem</span>
+        </div>
+        <input type="hidden" name="problema_fragmentacion" value="">
+      </div>
+    </div>
+  </div>
+
+  <!-- ─────── BLOQUE D: PRECIO Y ADOPCIÓN ─────── -->
+  <div class="section-divider">
+    <div class="section-divider-line"></div>
+    <div class="section-divider-text">
+      <span class="inline-es">D — Precio y decisión de compra</span>
+      <span class="inline-en">D — Pricing & Purchase Decision</span>
+    </div>
+    <div class="section-divider-line"></div>
+  </div>
+
+  <!-- Q10 -->
+  <div class="q-section" id="q10">
+    <div class="q-section-header">
+      <div class="q-num">10</div>
+      <div class="q-content">
+        <div class="q-title" data-lang="es">¿Cuánto estarías dispuesto a pagar por una plataforma completa de rendimiento? <span class="req">*</span></div>
+        <div class="q-title" data-lang="en">What would you be willing to pay for a complete performance platform? <span class="req">*</span></div>
+        <div class="q-title-alt" data-lang="es">Precio mensual por club (no por usuario)</div>
+        <div class="q-title-alt" data-lang="en">Monthly price per club (not per user)</div>
+      </div>
+    </div>
+    <div class="q-body">
+      <div class="options" data-name="precio_willingness" data-required="true">
+        <label class="option-label"><input type="radio" name="precio_willingness" value="<100"><div class="option-check"></div><div class="option-text"><strong data-lang="es">Menos de €100/mes — No me parece razonable pagar más</strong><strong data-lang="en">Less than €100/mo — Not willing to pay more</strong></div></label>
+        <label class="option-label"><input type="radio" name="precio_willingness" value="100-299"><div class="option-check"></div><div class="option-text"><strong>€100–299/mes</strong><small data-lang="es"> — Asequible para clubs de nivel bajo</small><small data-lang="en"> — Affordable for lower-level clubs</small></div></label>
+        <label class="option-label"><input type="radio" name="precio_willingness" value="300-599"><div class="option-check"></div><div class="option-text"><strong>€300–599/mes</strong><small data-lang="es"> — Rango razonable para 2ª división</small><small data-lang="en"> — Reasonable range for 2nd division</small></div></label>
+        <label class="option-label"><input type="radio" name="precio_willingness" value="600-1200"><div class="option-check"></div><div class="option-text"><strong>€600–1.200/mes</strong><small data-lang="es"> — Si la plataforma es realmente completa</small><small data-lang="en"> — If the platform is truly comprehensive</small></div></label>
+        <label class="option-label"><input type="radio" name="precio_willingness" value=">1200"><div class="option-check"></div><div class="option-text"><strong data-lang="es">Más de €1.200/mes — Manejamos presupuesto de club élite</strong><strong data-lang="en">More than €1,200/mo — We operate at elite club budget level</strong></div></label>
+      </div>
+    </div>
+  </div>
+
+  <!-- Q11 -->
+  <div class="q-section" id="q11">
+    <div class="q-section-header">
+      <div class="q-num">11</div>
+      <div class="q-content">
+        <div class="q-title" data-lang="es">¿Quién toma la decisión de compra de software en tu club? <span class="req">*</span></div>
+        <div class="q-title" data-lang="en">Who makes the software purchase decision at your club? <span class="req">*</span></div>
+      </div>
+    </div>
+    <div class="q-body">
+      <div class="options grid" data-name="decision_maker" data-required="true">
+        <label class="option-label"><input type="radio" name="decision_maker" value="yo_mismo"><div class="option-check"></div><div class="option-text"><strong data-lang="es">Yo mismo</strong><strong data-lang="en">I do</strong></div></label>
+        <label class="option-label"><input type="radio" name="decision_maker" value="dir_rendimiento"><div class="option-check"></div><div class="option-text"><strong data-lang="es">Director de Rendimiento</strong><strong data-lang="en">Performance Director</strong></div></label>
+        <label class="option-label"><input type="radio" name="decision_maker" value="director_deportivo"><div class="option-check"></div><div class="option-text"><strong data-lang="es">Director Deportivo</strong><strong data-lang="en">Sporting Director</strong></div></label>
+        <label class="option-label"><input type="radio" name="decision_maker" value="presidencia"><div class="option-check"></div><div class="option-text"><strong data-lang="es">Presidencia / Dirección General</strong><strong data-lang="en">Club President / CEO</strong></div></label>
+        <label class="option-label"><input type="radio" name="decision_maker" value="it_admin"><div class="option-check"></div><div class="option-text"><strong data-lang="es">IT / Administración</strong><strong data-lang="en">IT / Administration</strong></div></label>
+        <label class="option-label"><input type="radio" name="decision_maker" value="compartida"><div class="option-check"></div><div class="option-text"><strong data-lang="es">Decisión compartida</strong><strong data-lang="en">Shared / committee decision</strong></div></label>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─────── BLOQUE E: INTERÉS Y CONTACTO ─────── -->
+  <div class="section-divider">
+    <div class="section-divider-line"></div>
+    <div class="section-divider-text">
+      <span class="inline-es">E — Interés en ClavaMetrics</span>
+      <span class="inline-en">E — Interest in ClavaMetrics</span>
+    </div>
+    <div class="section-divider-line"></div>
+  </div>
+
+  <!-- Q12 — SCALE -->
+  <div class="q-section" id="q12">
+    <div class="q-section-header">
+      <div class="q-num">12</div>
+      <div class="q-content">
+        <div class="q-title" data-lang="es">Si existiera una plataforma como ClavaMetrics hoy, ¿qué probabilidad habría de que tu club la adoptara? <span class="req">*</span></div>
+        <div class="q-title" data-lang="en">If a platform like ClavaMetrics existed today, how likely would your club be to adopt it? <span class="req">*</span></div>
+      </div>
+    </div>
+    <div class="q-body">
+      <div class="scale-wrap" data-name="prob_adopcion" data-required="true">
+        <div class="scale-options">
+          <button type="button" class="scale-btn" data-val="1" onclick="selectScale(this,'prob_adopcion')">1</button>
+          <button type="button" class="scale-btn" data-val="2" onclick="selectScale(this,'prob_adopcion')">2</button>
+          <button type="button" class="scale-btn" data-val="3" onclick="selectScale(this,'prob_adopcion')">3</button>
+          <button type="button" class="scale-btn" data-val="4" onclick="selectScale(this,'prob_adopcion')">4</button>
+          <button type="button" class="scale-btn" data-val="5" onclick="selectScale(this,'prob_adopcion')">5</button>
+          <button type="button" class="scale-btn" data-val="6" onclick="selectScale(this,'prob_adopcion')">6</button>
+          <button type="button" class="scale-btn" data-val="7" onclick="selectScale(this,'prob_adopcion')">7</button>
+          <button type="button" class="scale-btn" data-val="8" onclick="selectScale(this,'prob_adopcion')">8</button>
+          <button type="button" class="scale-btn" data-val="9" onclick="selectScale(this,'prob_adopcion')">9</button>
+          <button type="button" class="scale-btn" data-val="10" onclick="selectScale(this,'prob_adopcion')">10</button>
+        </div>
+        <div class="scale-labels">
+          <span data-lang="es">Muy improbable</span><span data-lang="en">Very unlikely</span>
+          <span data-lang="es">Definitivamente sí</span><span data-lang="en">Definitely yes</span>
+        </div>
+        <input type="hidden" name="prob_adopcion" value="">
+      </div>
+    </div>
+  </div>
+
+  <!-- Q13 — OPEN TEXT -->
+  <div class="q-section" id="q13">
+    <div class="q-section-header">
+      <div class="q-num">13</div>
+      <div class="q-content">
+        <div class="q-title" data-lang="es">¿Cuál es el mayor problema que una plataforma como ClavaMetrics debería resolver para que fuera imprescindible para ti?</div>
+        <div class="q-title" data-lang="en">What is the single biggest problem that a platform like ClavaMetrics should solve to become indispensable for you?</div>
+        <div class="q-optional" data-lang="es">Opcional</div>
+        <div class="q-optional" data-lang="en">Optional</div>
+      </div>
+    </div>
+    <div class="q-body">
+      <textarea class="textarea-input" name="mayor_problema" placeholder-es="Cuéntanos con tus propias palabras…" placeholder-en="Tell us in your own words…" rows="4"></textarea>
+    </div>
+  </div>
+
+  <!-- Q14 — CONTACT -->
+  <div class="q-section" id="q14">
+    <div class="q-section-header">
+      <div class="q-num">14</div>
+      <div class="q-content">
+        <div class="q-title" data-lang="es">¿Te gustaría participar como early adopter o design partner?</div>
+        <div class="q-title" data-lang="en">Would you like to participate as an early adopter or design partner?</div>
+        <div class="q-title-alt" data-lang="es">Acceso gratuito durante el piloto, a cambio de feedback directo.</div>
+        <div class="q-title-alt" data-lang="en">Free access during the pilot phase, in exchange for direct feedback.</div>
+        <div class="q-optional" data-lang="es">Opcional — solo si quieres que te contactemos</div>
+        <div class="q-optional" data-lang="en">Optional — only if you want us to reach out</div>
+      </div>
+    </div>
+    <div class="q-body">
+      <div class="input-row" style="margin-bottom:12px;">
+        <div class="input-group">
+          <label class="input-label" data-lang="es">Nombre</label>
+          <label class="input-label" data-lang="en">Name</label>
+          <input type="text" class="text-input" name="nombre" placeholder-es="Tu nombre" placeholder-en="Your name">
+        </div>
+        <div class="input-group">
+          <label class="input-label" data-lang="es">Club / Organización</label>
+          <label class="input-label" data-lang="en">Club / Organisation</label>
+          <input type="text" class="text-input" name="club" placeholder-es="Nombre del club" placeholder-en="Club name">
+        </div>
+      </div>
+      <div class="input-group">
+        <label class="input-label">Email</label>
+        <input type="email" class="text-input" name="email" placeholder-es="tu@email.com" placeholder-en="your@email.com">
+      </div>
+    </div>
+  </div>
+
+  <!-- SUBMIT -->
+  <div class="submit-area">
+    <p class="submit-note" data-lang="es">Tus respuestas son completamente anónimas (a menos que dejes tu contacto). La información se usará exclusivamente para desarrollar un mejor producto. No recibirás spam.</p>
+    <p class="submit-note" data-lang="en">Your answers are completely anonymous (unless you leave your contact info). Data will be used exclusively to build a better product. No spam, ever.</p>
+    <button type="submit" class="submit-btn">
+      <span data-lang="es">Enviar respuestas</span>
+      <span data-lang="en">Submit answers</span>
+      <span>→</span>
+    </button>
+  </div>
+
+</form>
+</div>
+
+<!-- THANK YOU -->
+<div class="thankyou" id="thankyou">
+  <div class="thankyou-icon">⚽</div>
+  <h2>
+    <span data-lang="es">Gracias por tu</span>
+    <span data-lang="en">Thanks for your</span>
+    <span class="highlight" data-lang="es">aportación.</span>
+    <span class="highlight" data-lang="en">input.</span>
+  </h2>
+  <p data-lang="es">Tu experiencia nos ayuda a construir la herramienta que el staff técnico realmente necesita. Si has dejado tu contacto, nos pondremos en touch pronto.</p>
+  <p data-lang="en">Your experience helps us build the tool that technical staff truly need. If you left your contact details, we'll be in touch soon.</p>
+  <div class="thankyou-results">
+    <div class="result-card">
+      <div class="result-val" id="result-preguntas">14</div>
+      <div class="result-lbl" data-lang="es">Preguntas contestadas</div>
+      <div class="result-lbl" data-lang="en">Questions answered</div>
+    </div>
+    <div class="result-card">
+      <div class="result-val" id="result-interes">—</div>
+      <div class="result-lbl" data-lang="es">Tu interés (1–10)</div>
+      <div class="result-lbl" data-lang="en">Your interest (1–10)</div>
+    </div>
+    <div class="result-card">
+      <div class="result-val">✓</div>
+      <div class="result-lbl" data-lang="es">Respuesta registrada</div>
+      <div class="result-lbl" data-lang="en">Response recorded</div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── LANG SYSTEM ───
+function setLang(lang) {
+  document.body.className = lang === 'en' ? 'lang-en' : '';
+  document.querySelectorAll('.lang-btn').forEach(b => {
+    b.classList.toggle('active', b.textContent.trim().toLowerCase() === lang);
+  });
+  // Update placeholders
+  document.querySelectorAll('[placeholder-es],[placeholder-en]').forEach(el => {
+    const ph = lang === 'en' ? el.getAttribute('placeholder-en') : el.getAttribute('placeholder-es');
+    if (ph) el.placeholder = ph;
+  });
+}
+
+// Init placeholders
+setLang('es');
+
+// ─── RADIO/CHECKBOX SELECTION ───
+document.querySelectorAll('.options').forEach(optGroup => {
+  const isCheckbox = optGroup.dataset.type === 'checkbox';
+  const maxSel = parseInt(optGroup.dataset.max) || 999;
+
+  optGroup.querySelectorAll('.option-label').forEach(label => {
+    label.addEventListener('click', function() {
+      const input = this.querySelector('input');
+      if (isCheckbox) {
+        // Toggle
+        const checked = optGroup.querySelectorAll('input:checked');
+        if (!input.checked && checked.length >= maxSel) {
+          // show hint
+          const name = optGroup.dataset.name;
+          document.querySelectorAll(`#hint-q7, #hint-q7-en`).forEach(h => h.classList.add('visible'));
+          return;
+        }
+        input.checked = !input.checked;
+        this.classList.toggle('selected', input.checked);
+        document.querySelectorAll(`#hint-q7, #hint-q7-en`).forEach(h => h.classList.remove('visible'));
+      } else {
+        optGroup.querySelectorAll('.option-label').forEach(l => l.classList.remove('selected'));
+        input.checked = true;
+        this.classList.add('selected');
+
+        // ── Show/hide "Otro" free-text fields ──
+        // First hide all other-input-wraps linked to options in this group
+        optGroup.querySelectorAll('[data-triggers]').forEach(triggerLabel => {
+          const targetId = triggerLabel.dataset.triggers;
+          const wrap = document.getElementById(targetId);
+          if (wrap) {
+            wrap.classList.remove('visible');
+            wrap.querySelector('input').value = '';
+          }
+        });
+        // Then show the one for the clicked label (if any)
+        const triggersId = this.dataset.triggers;
+        if (triggersId) {
+          const wrap = document.getElementById(triggersId);
+          if (wrap) {
+            wrap.classList.add('visible');
+            wrap.querySelector('input').focus();
+          }
+        }
+      }
+      markSectionComplete(optGroup.closest('.q-section'));
+      updateProgress();
+    });
+  });
+});
+
+// ─── SCALE SELECTION ───
+function selectScale(btn, name) {
+  const wrap = btn.closest('.scale-wrap');
+  wrap.querySelectorAll('.scale-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  wrap.querySelector(`input[name="${name}"]`).value = btn.dataset.val;
+  markSectionComplete(wrap.closest('.q-section'));
+  updateProgress();
+}
+
+// ─── TEXTAREA LANG ───
+document.querySelectorAll('textarea').forEach(ta => {
+  ta.addEventListener('input', () => {
+    if (ta.value.length > 0) markSectionComplete(ta.closest('.q-section'));
+    updateProgress();
+  });
+});
+document.querySelectorAll('input[type=text], input[type=email]').forEach(inp => {
+  inp.addEventListener('input', updateProgress);
+});
+
+// ─── SECTION STATE ───
+function markSectionComplete(section) {
+  if (!section) return;
+  section.classList.add('completed');
+  section.classList.remove('active');
+}
+
+// Highlight active section on focus
+document.querySelectorAll('.q-section').forEach(section => {
+  section.addEventListener('focusin', () => {
+    document.querySelectorAll('.q-section').forEach(s => s.classList.remove('active'));
+    section.classList.add('active');
+  });
+});
+
+// ─── PROGRESS ───
+const TOTAL_Q = 12; // required questions count
+
+function countAnswered() {
+  let answered = 0;
+  // Radios
+  ['rol','nivel','pais','n_herramientas','software_actual','precio_willingness','decision_maker'].forEach(name => {
+    if (document.querySelector(`input[name="${name}"]:checked`)) answered++;
+  });
+  // Checkboxes (at least 1)
+  ['fricciones','modulos_valor'].forEach(name => {
+    if (document.querySelector(`input[name="${name}"]:checked`)) answered++;
+  });
+  // Scales
+  ['valor_integracion','problema_fragmentacion','prob_adopcion'].forEach(name => {
+    if (document.querySelector(`input[name="${name}"]`)?.value) answered++;
+  });
+  return Math.min(answered, TOTAL_Q);
+}
+
+function updateProgress() {
+  const answered = countAnswered();
+  const pct = Math.round((answered / TOTAL_Q) * 100);
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressText').textContent = `${answered} / ${TOTAL_Q}`;
+}
+
+// ─── FORM SUBMIT ───
+document.getElementById('surveyForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+
+  // Basic validation
+  const required = ['rol','nivel','pais','n_herramientas','software_actual','precio_willingness','decision_maker'];
+  let valid = true;
+  required.forEach(name => {
+    if (!document.querySelector(`input[name="${name}"]:checked`)) {
+      valid = false;
+    }
+  });
+
+  const scales = ['valor_integracion','problema_fragmentacion','prob_adopcion'];
+  scales.forEach(name => {
+    if (!document.querySelector(`input[name="${name}"]`)?.value) valid = false;
+  });
+
+  if (!document.querySelector('input[name="fricciones"]:checked')) valid = false;
+  if (!document.querySelector('input[name="modulos_valor"]:checked')) valid = false;
+
+  if (!valid) {
+    // Scroll to first unanswered
+    const allSections = document.querySelectorAll('.q-section');
+    for (let s of allSections) {
+      const hasRadio = s.querySelector('input[type=radio]');
+      const hasChecked = s.querySelector('input:checked');
+      const hasScale = s.querySelector('input[type=hidden]');
+      const scaleVal = hasScale ? hasScale.value : null;
+
+      if (hasRadio && !hasChecked) {
+        s.scrollIntoView({ behavior:'smooth', block:'center' });
+        s.classList.add('active');
+        break;
+      }
+      if (hasScale && !scaleVal && s.querySelector('.scale-wrap')) {
+        s.scrollIntoView({ behavior:'smooth', block:'center' });
+        s.classList.add('active');
+        break;
+      }
+    }
+    return;
+  }
+
+  // Collect data
+  const formData = new FormData(this);
+  const data = {};
+  for (let [key, val] of formData.entries()) {
+    if (data[key]) {
+      data[key] = Array.isArray(data[key]) ? [...data[key], val] : [data[key], val];
+    } else {
+      data[key] = val;
+    }
+  }
+
+  // Merge "Otro" free-text values into their parent field
+  const otroMerges = [
+    { parent: 'rol',            freeText: 'rol_otro' },
+    { parent: 'pais',           freeText: 'pais_otro' },
+    { parent: 'software_actual',freeText: 'software_actual_otro' },
+  ];
+  otroMerges.forEach(({ parent, freeText }) => {
+    const txt = (data[freeText] || '').trim();
+    if (txt) data[parent] = `Otro: ${txt}`;
+    delete data[freeText];
+  });
+
+  // Show thank you
+  const interest = data.prob_adopcion || '—';
+  document.getElementById('result-interes').textContent = interest;
+  document.getElementById('mainContent').style.display = 'none';
+  document.getElementById('formWrapper').style.display = 'none';
+  document.querySelector('.survey-progress').style.display = 'none';
+  document.getElementById('thankyou').classList.add('visible');
+
+  // Scroll to top
+  window.scrollTo({ top:0, behavior:'smooth' });
+
+  // ─────────────────────────────────────────────────────────────
+  // 🔗 GOOGLE SHEETS INTEGRATION
+  // Pega aquí la URL de tu Google Apps Script deployment:
+  // Extensiones → Apps Script → Implementar → Nueva implementación
+  // ─────────────────────────────────────────────────────────────
+  const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbzTCug6HuH4pSopO5tBy14S6NRrjM-XjDxh55BQwtziEg6hKKL0tfgyEe-KhtzwMjPA/exec';
+  // ─────────────────────────────────────────────────────────────
+
+  if (SHEETS_URL) {
+    // Add timestamp and language
+    data['timestamp'] = new Date().toISOString();
+    data['idioma'] = document.documentElement.lang || 'es';
+
+    // Flatten arrays to comma-separated strings for Sheets
+    const flatData = {};
+    for (let [k, v] of Object.entries(data)) {
+      flatData[k] = Array.isArray(v) ? v.join(', ') : v;
+    }
+
+    fetch(SHEETS_URL, {
+      method: 'POST',
+      mode: 'no-cors', // Apps Script requires no-cors
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(flatData)
+    })
+    .then(() => {
+      console.log('✅ Respuesta enviada a Google Sheets');
+    })
+    .catch(err => {
+      console.warn('⚠️ Error enviando a Sheets (los datos no se pierden):', err);
+    });
+  } else {
+    console.log('ℹ️ Survey data (configura SHEETS_URL para guardar):', JSON.stringify(data, null, 2));
+  }
+});
+</script>
+</body>
+</html>
